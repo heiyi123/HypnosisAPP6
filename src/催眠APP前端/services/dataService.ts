@@ -511,6 +511,25 @@ function normalizeSystemAliases(systemRaw: Record<string, any>) {
     const mcEnergyMax = toFiniteNumber(systemRaw.MC能量上限);
     if (mcEnergyMax !== null) systemRaw._MC能量上限 = mcEnergyMax;
   }
+
+  // PT 点数：兼容旧字段名（MC点）并避免“写回”旧字段造成混淆
+  const existingPt = toFiniteNumber(systemRaw.当前PT点);
+  if (existingPt === null) {
+    const legacy = toFiniteNumber(systemRaw.当前MC点);
+    if (legacy !== null) systemRaw.当前PT点 = legacy;
+  }
+  if (typeof systemRaw.当前MC点 !== 'undefined') {
+    delete systemRaw.当前MC点;
+  }
+
+  const existingTotalPt = toFiniteNumber(systemRaw._累计消耗PT点);
+  if (existingTotalPt === null) {
+    const legacy = toFiniteNumber(systemRaw._累计消耗MC点);
+    if (legacy !== null) systemRaw._累计消耗PT点 = legacy;
+  }
+  if (typeof systemRaw._累计消耗MC点 !== 'undefined') {
+    delete systemRaw._累计消耗MC点;
+  }
   return systemRaw;
 }
 
