@@ -392,9 +392,7 @@ const HomeScreen = ({
           </div>
         )}
         {typeof systemDayCount === 'number' && systemDayCount >= 1 ? (
-          <div className="text-2xl font-medium text-cyan-200/95 tracking-wide">
-            穿越第 {systemDayCount} 天
-          </div>
+          <div className="text-2xl font-medium text-cyan-200/95 tracking-wide">穿越第 {systemDayCount} 天</div>
         ) : (
           <div className="text-sm text-white/40">穿越天数未设定</div>
         )}

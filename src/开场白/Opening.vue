@@ -109,21 +109,15 @@ async function onSubmit() {
     );
     hasSubmittedOnce.value = true;
     console.info('开场白消息已插入聊天', { message });
-    try {
-      // 使用酒馆内置 toastr，如果可用的话
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).toastr?.success?.('已插入开场白消息，可在聊天中点“重新生成”开始。');
-    } catch {
-      // ignore
-    }
+    // 使用酒馆内置 toastr，如果可用的话
+    (window as unknown as { toastr?: { success?: (msg: string) => void } }).toastr?.success?.(
+      '已插入开场白消息，可在聊天中点“重新生成”开始。',
+    );
   } catch (e) {
     console.error('开场白消息插入失败', e);
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).toastr?.error?.('开场白消息插入失败，请稍后重试。');
-    } catch {
-      // ignore
-    }
+    (window as unknown as { toastr?: { error?: (msg: string) => void } }).toastr?.error?.(
+      '开场白消息插入失败，请稍后重试。',
+    );
   } finally {
     sending.value = false;
   }
