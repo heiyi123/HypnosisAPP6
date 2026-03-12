@@ -53,7 +53,8 @@ export const CharacterRegistryApp: React.FC<CharacterRegistryAppProps> = ({ onBa
       const worldbookName =
         charBooks.primary ??
         charBooks.additional[0] ??
-        ((await getChatWorldbookName('current')) ?? (await getOrCreateChatWorldbook('current')));
+        (await getChatWorldbookName('current')) ??
+        (await getOrCreateChatWorldbook('current'));
 
       const entryName = buildVariableEntryName(trimmedName);
       const worldbook = await getWorldbook(worldbookName);
@@ -181,9 +182,10 @@ export const CharacterRegistryApp: React.FC<CharacterRegistryAppProps> = ({ onBa
           onClick={handleSubmit}
           disabled={submitting || !name.trim()}
           className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold shadow-lg transition-all
-            ${submitting || !name.trim()
-              ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
-              : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-black hover:shadow-emerald-500/40 active:scale-95'
+            ${
+              submitting || !name.trim()
+                ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-black hover:shadow-emerald-500/40 active:scale-95'
             }`}
         >
           <Lock size={18} />
