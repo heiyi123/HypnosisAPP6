@@ -78,6 +78,7 @@ const preview = computed(() => buildMessage());
 
 function buildMessage(): string {
   const lines = [
+    '开始生成开场白',
     `目标世界：${form.targetWorld}`,
     `穿越方式：${form.crossType}`,
     `主角设定：${form.protagonist}`,
@@ -90,21 +91,13 @@ async function onSubmit() {
   const message = buildMessage();
   sending.value = true;
   try {
-    // 在当前聊天中追加一条用户消息，但不触发生成，让玩家手动点“重新生成”
-    SillyTavern.addOneMessage(
-      {
-        name: SillyTavern.name1,
-        is_user: true,
-        is_system: false,
-        mes: message,
-      },
-      { scroll: true },
-    );
-    console.info('开场白消息已插入聊天', { message });
+    // 将开场白指令填入酒馆的发送输入框，让玩家自行点击发送/重新生成
+    $('#send_textarea').val(message).trigger('input');
+    console.info('开场白消息已填入输入框', { message });
   } catch (e) {
-    console.error('开场白消息插入失败', e);
+    console.error('开场白消息填入输入框失败', e);
     (window as unknown as { toastr?: { error?: (msg: string) => void } }).toastr?.error?.(
-      '开场白消息插入失败，请稍后重试。',
+      '开场白消息填入失败，请稍后重试。',
     );
   } finally {
     sending.value = false;
