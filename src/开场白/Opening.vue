@@ -38,13 +38,7 @@
           />
         </div>
 
-        <button
-          type="submit"
-          class="opening__submit"
-          :disabled="!canSubmit"
-        >
-          开始穿越
-        </button>
+        <button type="submit" class="opening__submit" :disabled="!canSubmit">开始穿越</button>
       </form>
     </div>
   </div>
