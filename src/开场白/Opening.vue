@@ -34,7 +34,7 @@
             v-model.trim="form.protagonist"
             class="opening__textarea"
             rows="3"
-            placeholder="一句话概括主角人设"
+            placeholder="一句话概括主角人设；替换穿越请写清在异世界的身份"
           />
         </div>
 
@@ -45,10 +45,6 @@
         >
           {{ sending ? '正在向 AI 发送开场白…' : '开始穿越' }}
         </button>
-
-        <p v-if="hasSubmittedOnce" class="opening__hint opening__hint--bottom">
-          已发送开场白，可直接继续对话。
-        </p>
       </form>
 
       <div v-if="canSubmit" class="opening__preview">
@@ -69,7 +65,6 @@ const form = reactive({
 });
 
 const sending = ref(false);
-const hasSubmittedOnce = ref(false);
 
 const canSubmit = computed(() => {
   return (
@@ -83,8 +78,6 @@ const preview = computed(() => buildMessage());
 
 function buildMessage(): string {
   const lines = [
-    '生成开场白：',
-    '说明：肉身穿越 = 以外来人的身份直接穿越到异世界；替换穿越 = 获得一个已存在的异世界身份开局。',
     `目标世界：${form.targetWorld}`,
     `穿越方式：${form.crossType}`,
     `主角设定：${form.protagonist}`,
@@ -107,12 +100,7 @@ async function onSubmit() {
       },
       { scroll: true },
     );
-    hasSubmittedOnce.value = true;
     console.info('开场白消息已插入聊天', { message });
-    // 使用酒馆内置 toastr，如果可用的话
-    (window as unknown as { toastr?: { success?: (msg: string) => void } }).toastr?.success?.(
-      '已插入开场白消息，可在聊天中点“重新生成”开始。',
-    );
   } catch (e) {
     console.error('开场白消息插入失败', e);
     (window as unknown as { toastr?: { error?: (msg: string) => void } }).toastr?.error?.(
@@ -127,20 +115,29 @@ async function onSubmit() {
 <style scoped>
 .opening {
   width: 100%;
-  min-height: 280px;
-  padding: 1rem;
+  min-height: 100%;
+  padding: 2rem 1.5rem;
   box-sizing: border-box;
   background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
   color: #e0e7ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .opening__inner {
-  max-width: 24rem;
+  width: 100%;
+  max-width: 32rem;
   margin: 0 auto;
+  padding: 1.75rem 1.5rem 1.5rem;
+  border-radius: 16px;
+  background: radial-gradient(circle at top, rgba(129, 140, 248, 0.4), transparent 55%),
+    rgba(15, 23, 42, 0.96);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.75);
 }
 .opening__title {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin: 0 0 1rem;
+  margin: 0 0 1.5rem;
   text-align: center;
   letter-spacing: 0.05em;
 }
@@ -159,27 +156,27 @@ async function onSubmit() {
 .opening__field {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 .opening__label {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  opacity: 0.95;
+  opacity: 0.96;
 }
 .opening__input,
 .opening__textarea {
   width: 100%;
-  padding: 0.5rem 0.6rem;
-  font-size: 0.875rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
   color: #e5e7eb;
   background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(129, 140, 248, 0.6);
-  border-radius: 6px;
+  border: 1px solid rgba(129, 140, 248, 0.7);
+  border-radius: 8px;
   box-sizing: border-box;
 }
 .opening__textarea {
   resize: vertical;
-  min-height: 4rem;
+  min-height: 4.2rem;
 }
 .opening__input::placeholder,
 .opening__textarea::placeholder {
@@ -195,7 +192,7 @@ async function onSubmit() {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.875rem;
+  font-size: 0.88rem;
   cursor: pointer;
 }
 .opening__radio input {
@@ -211,29 +208,33 @@ async function onSubmit() {
   margin-top: 0.25rem;
 }
 .opening__submit {
-  margin-top: 0.5rem;
-  padding: 0.6rem 1rem;
-  font-size: 0.9375rem;
+  margin-top: 0.75rem;
+  padding: 0.7rem 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1e1b4b;
   background: linear-gradient(180deg, #a5b4fc 0%, #818cf8 100%);
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background 0.12s ease-out,
+    opacity 0.12s ease-out;
 }
 .opening__submit:hover:not(:disabled) {
   background: linear-gradient(180deg, #c7d2fe 0%, #a5b4fc 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.6);
 }
 .opening__submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 .opening__preview {
-  margin-top: 1.25rem;
-  padding: 0.75rem 0.75rem 0.65rem;
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(129, 140, 248, 0.6);
+  margin-top: 1.5rem;
+  padding: 0.85rem 0.8rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(129, 140, 248, 0.7);
 }
 .opening__preview-title {
   font-size: 0.75rem;
