@@ -38,11 +38,7 @@
           />
         </div>
 
-        <button
-          type="submit"
-          class="opening__submit"
-          :disabled="!canSubmit || sending"
-        >
+        <button type="submit" class="opening__submit" :disabled="!canSubmit || sending">
           {{ sending ? '正在向 AI 发送开场白…' : '开始穿越' }}
         </button>
       </form>
@@ -123,8 +119,7 @@ async function onSubmit() {
   margin: 0 auto;
   padding: 1.75rem 1.5rem 1.5rem;
   border-radius: 16px;
-  background: radial-gradient(circle at top, rgba(129, 140, 248, 0.4), transparent 55%),
-    rgba(15, 23, 42, 0.96);
+  background: radial-gradient(circle at top, rgba(129, 140, 248, 0.4), transparent 55%), rgba(15, 23, 42, 0.96);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.75);
 }
 .opening__title {
@@ -210,7 +205,10 @@ async function onSubmit() {
   border: none;
   border-radius: 999px;
   cursor: pointer;
-  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background 0.12s ease-out,
+  transition:
+    transform 0.12s ease-out,
+    box-shadow 0.12s ease-out,
+    background 0.12s ease-out,
     opacity 0.12s ease-out;
 }
 .opening__submit:hover:not(:disabled) {
