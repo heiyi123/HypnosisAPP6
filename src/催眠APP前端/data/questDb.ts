@@ -252,121 +252,121 @@ export const QUEST_DB: QuestDefinition[] = [
     condition: '让夏美在公共场合只涂着人体彩绘。',
     rewardMcPoints: 45,
   },
-    {
+  {
     id: 'quest_roxy_dangerous_class',
     name: '危险课堂',
     condition: '让洛琪希在上课途中高潮。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_roxy_dormitories_visit',
     name: '秘密查寝',
     condition: '让洛琪希在宿舍查寝期间和你做爱且不被发现。',
     rewardMcPoints: 40,
   },
-   {
+  {
     id: 'quest_roxy_table',
     name: '桌下秘密',
     condition: '在教师办公室有其他老师的情况下让洛琪希藏在她的办公桌下为你口交。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_roxy_floating',
     name: '雌悬浮',
     condition: '在学校里抱着洛琪希做爱且全程不让洛琪希双脚着地。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_roxy_sex_education',
     name: '性教育课',
     condition: '在保健体育课上和洛琪希现场做爱进行演示。',
     rewardMcPoints: 40,
   },
-   {
+  {
     id: 'quest_roxy_taste_first',
     name: '抢先一步',
     condition: '让洛琪希在和丈夫性生活之前先和你做爱。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_ui_library',
     name: '图书馆请安静',
     condition: '在图书馆有其他学生时和古关忧做爱。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_ui_smell',
     name: '有味道',
     condition: '让古关忧带着精液的味道活动一整天。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_rikka_deceive',
     name: '忽悠大师',
     condition: '不使用催眠纯靠忽悠骗小鸟游六花和你做爱。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_rikka_group',
     name: '社团活动',
     condition: '将小鸟游六花的社团活动变成淫趴。',
     rewardMcPoints: 40,
   },
-   {
+  {
     id: 'quest_chika_union',
     name: '欢迎来到学生会',
     condition: '在学生会室和藤原千花做爱。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_chika_game',
     name: '我是赢家',
     condition: '和藤原千花进行任意游戏比赛并获胜。',
     rewardMcPoints: 20,
   },
-   {
+  {
     id: 'quest_sagiri_found',
     name: '不再神秘',
     condition: '找到和泉纱雾的宿舍。',
     rewardMcPoints: 10,
   },
-   {
+  {
     id: 'quest_sagiri_secret',
     name: '她的秘密',
     condition: '掌握和泉纱雾就是工口漫画老师的证据。',
     rewardMcPoints: 20,
   },
-   {
+  {
     id: 'quest_sagiri_brother_wrong',
     name: '谁是哥哥',
     condition: '让和泉纱雾认为你是她的哥哥然后和你做爱。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_sagiri_brother_sex',
     name: '兄妹乱伦？',
     condition: '让和泉纱雾和她的哥哥做爱。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_sagiri_outside',
     name: '户外运动',
     condition: '让和泉纱雾在不被催眠的情况下离开宿舍楼。',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_sagiri_class',
     name: '网课时间',
     condition: '在和泉纱雾上网课期间和她做爱且不被网课老师发现。',
     rewardMcPoints: 40,
   },
-   {
+  {
     id: 'quest_sagiri_fans',
     name: '粉丝福利',
     condition: '让和泉纱雾在onlyfans上上传自己的色情写真',
     rewardMcPoints: 30,
   },
-   {
+  {
     id: 'quest_sagiri_fanslive',
     name: '直播时间',
     condition: '让和泉纱雾进行onlyfans直播并且直播和她做爱',

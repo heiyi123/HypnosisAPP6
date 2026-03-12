@@ -360,17 +360,17 @@ const HomeScreen = ({
   ];
   const visibleApps: DesktopApp[] = bodyStatsUnlocked
     ? [
-      apps[0],
-      {
-        id: 'stats',
-        name: '身体检测',
-        icon: Activity,
-        color: 'bg-blue-500',
-        mode: AppMode.BODY_STATS,
-        disabled: false,
-      },
-      ...apps.slice(1),
-    ]
+        apps[0],
+        {
+          id: 'stats',
+          name: '身体检测',
+          icon: Activity,
+          color: 'bg-blue-500',
+          mode: AppMode.BODY_STATS,
+          disabled: false,
+        },
+        ...apps.slice(1),
+      ]
     : apps;
 
   return (
