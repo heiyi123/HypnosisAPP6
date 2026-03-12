@@ -15,7 +15,7 @@
         </div>
 
         <div class="opening__field">
-          <label class="opening__label">穿越方式（二选一）</label>
+          <label class="opening__label">穿越方式</label>
           <div class="opening__radio-group">
             <label class="opening__radio">
               <input v-model="form.crossType" type="radio" value="肉身穿越" />
@@ -34,18 +34,27 @@
             v-model.trim="form.protagonist"
             class="opening__textarea"
             rows="3"
-            placeholder="简要写出主角人设；若为替换穿越，请写清楚扮演的身份"
+            placeholder="一句话概括主角人设"
           />
         </div>
 
         <button
           type="submit"
           class="opening__submit"
-          :disabled="!canSubmit"
+          :disabled="!canSubmit || sending"
         >
-          开始穿越
+          {{ sending ? '正在向 AI 发送开场白…' : '开始穿越' }}
         </button>
+
+        <p v-if="hasSubmittedOnce" class="opening__hint opening__hint--bottom">
+          已发送开场白，可直接继续对话。
+        </p>
       </form>
+
+      <div v-if="canSubmit" class="opening__preview">
+        <div class="opening__preview-title">将发送给 AI 的开场白指令预览</div>
+        <pre class="opening__preview-body">{{ preview }}</pre>
+      </div>
     </div>
   </div>
 </template>
@@ -59,6 +68,9 @@ const form = reactive({
   protagonist: '',
 });
 
+const sending = ref(false);
+const hasSubmittedOnce = ref(false);
+
 const canSubmit = computed(() => {
   return (
     form.targetWorld.length > 0 &&
@@ -66,6 +78,8 @@ const canSubmit = computed(() => {
     form.protagonist.length > 0
   );
 });
+
+const preview = computed(() => buildMessage());
 
 function buildMessage(): string {
   const lines = [
@@ -79,12 +93,39 @@ function buildMessage(): string {
 }
 
 async function onSubmit() {
-  if (!canSubmit.value) return;
+  if (!canSubmit.value || sending.value) return;
   const message = buildMessage();
+  sending.value = true;
   try {
-    await generate({ user_input: message });
+    // 在当前聊天中追加一条用户消息，但不触发生成，让玩家手动点“重新生成”
+    SillyTavern.addOneMessage(
+      {
+        name: SillyTavern.name1,
+        is_user: true,
+        is_system: false,
+        mes: message,
+      },
+      { scroll: true },
+    );
+    hasSubmittedOnce.value = true;
+    console.info('开场白消息已插入聊天', { message });
+    try {
+      // 使用酒馆内置 toastr，如果可用的话
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).toastr?.success?.('已插入开场白消息，可在聊天中点“重新生成”开始。');
+    } catch {
+      // ignore
+    }
   } catch (e) {
-    console.error('开场白发送失败', e);
+    console.error('开场白消息插入失败', e);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).toastr?.error?.('开场白消息插入失败，请稍后重试。');
+    } catch {
+      // ignore
+    }
+  } finally {
+    sending.value = false;
   }
 }
 </script>
@@ -108,6 +149,13 @@ async function onSubmit() {
   margin: 0 0 1rem;
   text-align: center;
   letter-spacing: 0.05em;
+}
+.opening__subtitle {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: #c7d2fe;
+  text-align: left;
 }
 .opening__form {
   display: flex;
@@ -165,6 +213,9 @@ async function onSubmit() {
   margin: 0;
   padding: 0.25rem 0;
 }
+.opening__hint--bottom {
+  margin-top: 0.25rem;
+}
 .opening__submit {
   margin-top: 0.5rem;
   padding: 0.6rem 1rem;
@@ -182,5 +233,27 @@ async function onSubmit() {
 .opening__submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.opening__preview {
+  margin-top: 1.25rem;
+  padding: 0.75rem 0.75rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(129, 140, 248, 0.6);
+}
+.opening__preview-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: #c7d2fe;
+}
+.opening__preview-body {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 8rem;
+  overflow-y: auto;
 }
 </style>
