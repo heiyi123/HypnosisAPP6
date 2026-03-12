@@ -1,13 +1,13 @@
-import { Activity, AlertTriangle, Calendar, Globe, HelpCircle, Trophy, UserPlus2 } from 'lucide-react';
+import { Activity, AlertTriangle, Globe, HelpCircle, Lock, Trophy } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { AchievementApp } from './components/AchievementApp';
 import { CharacterRegistryApp } from './components/CharacterRegistryApp';
-import { BodyStatsApp, CalendarApp, HelpApp, WipApp } from './components/CommonApps';
+import { BodyStatsApp, HelpApp, WipApp } from './components/CommonApps';
 import { CustomQuestApp } from './components/CustomQuestApp';
 import { HypnoLogoSVG, HypnosisApp } from './components/HypnosisApp';
 import { StatusBar } from './components/OS/StatusBar';
 import { DataService } from './services/dataService';
-import { waitForMvuReady } from './services/mvuBridge';
+import { MvuBridge, waitForMvuReady } from './services/mvuBridge';
 import { AppMode, UserResources } from './types';
 
 const FALLBACK_USER_DATA: UserResources = {
@@ -42,7 +42,10 @@ const App = () => {
   const [userData, setUserData] = useState<UserResources | null>(null);
   const [bodyStatsUnlocked, setBodyStatsUnlocked] = useState(false);
   const [systemTimeText, setSystemTimeText] = useState<string | undefined>(undefined);
-  const [systemDateText, setSystemDateText] = useState<string | undefined>(undefined);
+  /** 主屏展示：世界、穿越天数、地点（来自 MVU 系统） */
+  const [systemWorld, setSystemWorld] = useState<string | undefined>(undefined);
+  const [systemDayCount, setSystemDayCount] = useState<number | undefined>(undefined);
+  const [systemLocation, setSystemLocation] = useState<string | undefined>(undefined);
   const [localNow, setLocalNow] = useState(() => new Date());
   const userRefreshInFlightRef = useRef(false);
 
@@ -120,10 +123,20 @@ const App = () => {
 
     const refreshHomeHeader = async () => {
       try {
-        const [clock, unlocks] = await Promise.all([DataService.getSystemClock(), DataService.getUnlocks()]);
+        const [clock, unlocks, mvuSystem] = await Promise.all([
+          DataService.getSystemClock(),
+          DataService.getUnlocks(),
+          MvuBridge.getSystem().catch(() => null),
+        ]);
         if (stopped) return;
         setSystemTimeText(clock.timeText);
-        setSystemDateText(clock.dateText);
+        if (mvuSystem && typeof mvuSystem.世界 === 'string') setSystemWorld(mvuSystem.世界);
+        else if (mvuSystem == null) setSystemWorld(undefined);
+        const n = mvuSystem?.穿越天数;
+        if (typeof n === 'number' && Number.isFinite(n) && n >= 1) setSystemDayCount(Math.floor(n));
+        else setSystemDayCount(undefined);
+        if (mvuSystem && typeof mvuSystem.当前地点 === 'string') setSystemLocation(mvuSystem.当前地点);
+        else setSystemLocation(undefined);
         setBodyStatsUnlocked(unlocks.bodyStatsUnlocked);
       } catch (err) {
         console.warn('[HypnoOS] 刷新主页信息失败', err);
@@ -184,13 +197,13 @@ const App = () => {
               onLaunchApp={setCurrentApp}
               bodyStatsUnlocked={bodyStatsUnlocked}
               systemTimeText={systemTimeText}
-              systemDateText={systemDateText}
+              systemWorld={systemWorld}
+              systemDayCount={systemDayCount}
+              systemLocation={systemLocation}
               localNow={localNow}
             />
           );
         return <BodyStatsApp onBack={() => setCurrentApp(AppMode.HOME)} />;
-      case AppMode.CALENDAR:
-        return <CalendarApp onBack={() => setCurrentApp(AppMode.HOME)} />;
       case AppMode.HELP:
         return <HelpApp onBack={() => setCurrentApp(AppMode.HOME)} />;
       case AppMode.ACHIEVEMENTS: // New Route
@@ -212,7 +225,9 @@ const App = () => {
             onLaunchApp={setCurrentApp}
             bodyStatsUnlocked={bodyStatsUnlocked}
             systemTimeText={systemTimeText}
-            systemDateText={systemDateText}
+            systemWorld={systemWorld}
+            systemDayCount={systemDayCount}
+            systemLocation={systemLocation}
             localNow={localNow}
           />
         );
@@ -246,18 +261,20 @@ const HomeScreen = ({
   onLaunchApp,
   bodyStatsUnlocked,
   systemTimeText,
-  systemDateText,
+  systemWorld,
+  systemDayCount,
+  systemLocation,
   localNow,
 }: {
   onLaunchApp: (app: AppMode) => void;
   bodyStatsUnlocked: boolean;
   systemTimeText?: string;
-  systemDateText?: string;
+  systemWorld?: string;
+  systemDayCount?: number;
+  systemLocation?: string;
   localNow: Date;
 }) => {
   const displayTime = systemTimeText || `${localNow.getHours()}:${localNow.getMinutes().toString().padStart(2, '0')}`;
-  const displayDate =
-    systemDateText || localNow.toLocaleDateString('zh-CN', { weekday: 'long', month: 'long', day: 'numeric' });
 
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -314,14 +331,6 @@ const HomeScreen = ({
       mode: AppMode.HYPNOSIS,
       disabled: false,
     },
-    {
-      id: 'calendar',
-      name: '日历',
-      icon: Calendar,
-      color: 'bg-white text-black',
-      mode: AppMode.CALENDAR,
-      disabled: false,
-    },
     { id: 'help', name: '帮助', icon: HelpCircle, color: 'bg-gray-500', mode: AppMode.HELP, disabled: false },
     // Replaced Ghost with Achievements
     {
@@ -334,8 +343,8 @@ const HomeScreen = ({
     },
     {
       id: 'character-registry',
-      name: '角色录入',
-      icon: UserPlus2,
+      name: '角色锁定',
+      icon: Lock,
       color: 'bg-emerald-600',
       mode: AppMode.CHARACTER_REGISTRY,
       disabled: false,
@@ -375,10 +384,26 @@ const HomeScreen = ({
 
   return (
     <div className="relative h-full w-full bg-linear-to-b from-slate-900 via-purple-950 to-black flex flex-col pt-12 pb-24 animate-fade-in">
-      {/* Date Widget */}
-      <div className="px-6 mb-8 text-white/90 drop-shadow-md">
-        <div className="text-6xl font-thin tracking-tighter">{displayTime}</div>
-        <div className="text-lg font-medium">{displayDate}</div>
+      {/* 主屏：世界 / 穿越第N天 / 时间 / 地点 */}
+      <div className="px-6 mb-6 text-white/90 drop-shadow-md space-y-1">
+        {systemWorld && (
+          <div className="text-xs text-white/50 truncate" title={systemWorld}>
+            {systemWorld}
+          </div>
+        )}
+        {typeof systemDayCount === 'number' && systemDayCount >= 1 ? (
+          <div className="text-2xl font-medium text-cyan-200/95 tracking-wide">
+            穿越第 {systemDayCount} 天
+          </div>
+        ) : (
+          <div className="text-sm text-white/40">穿越天数未设定</div>
+        )}
+        <div className="text-6xl font-thin tracking-tighter pt-1">{displayTime}</div>
+        {systemLocation && (
+          <div className="text-sm text-white/55 truncate pt-1" title={systemLocation}>
+            {systemLocation}
+          </div>
+        )}
       </div>
 
       {/* App Grid */}
@@ -403,7 +428,7 @@ const HomeScreen = ({
               relative
             `}
             >
-              <app.icon size={28} className={app.id === 'calendar' ? 'text-black' : 'text-white'} />
+              <app.icon size={28} className="text-white" />
               {app.disabled && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl">
                   <span className="text-[8px] font-bold text-white bg-red-600 px-1 rounded">WIP</span>

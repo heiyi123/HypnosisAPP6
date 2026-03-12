@@ -1,0 +1,5 @@
+当前世界: {{get_message_variable::系统.世界}}
+穿越进度: 第 {{get_message_variable::系统.穿越天数}} 天
+现在的时间: {{get_message_variable::系统.当前时间}}
+现在的地点: {{get_message_variable::系统.当前地点}}
+---

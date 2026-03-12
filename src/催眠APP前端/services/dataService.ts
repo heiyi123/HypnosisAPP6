@@ -555,34 +555,37 @@ export const SUBSCRIPTION_PRICES: Record<SubscriptionTier, number> = {
 
 const SUBSCRIPTION_WEEK_MINUTES = 7 * 24 * 60;
 
-function parseVirtualMinutesFrom(dateText?: string, timeText?: string): number | null {
-  if (!dateText || !timeText) return null;
-  const dateMatch = dateText.match(/(\d+)\s*月\s*(\d+)\s*日/);
+/**
+ * 虚拟时间轴：仅支持「穿越天数」+「当前时间」，新卡不再兼容公历。
+ */
+function parseVirtualMinutesFrom(dateText: string | undefined, timeText?: string): number | null {
+  if (!timeText) return null;
   const timeMatch = timeText.match(/(\d{1,2})\s*:\s*(\d{1,2})(?:\s*:\s*(\d{1,2}))?/);
-  if (!dateMatch || !timeMatch) return null;
-
-  const month = Number(dateMatch[1]);
-  const day = Number(dateMatch[2]);
+  if (!timeMatch) return null;
   const hours = Number(timeMatch[1]);
   const minutes = Number(timeMatch[2]);
   const seconds = timeMatch[3] === undefined ? 0 : Number(timeMatch[3]);
-  if (![month, day, hours, minutes].every(Number.isFinite)) return null;
-  if (!Number.isFinite(seconds)) return null;
-
-  const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  const mIndex = Math.max(1, Math.min(12, month)) - 1;
-  const dIndex = Math.max(1, Math.min(monthDays[mIndex], day)) - 1;
-  const dayOfYear = monthDays.slice(0, mIndex).reduce((a, b) => a + b, 0) + dIndex;
-
+  if (![hours, minutes].every(Number.isFinite) || !Number.isFinite(seconds)) return null;
   const h = Math.max(0, Math.min(23, hours));
   const min = Math.max(0, Math.min(59, minutes));
   const sec = Math.max(0, Math.min(59, seconds));
-  return dayOfYear * 24 * 60 + h * 60 + min + sec / 60;
+  const minuteOfDay = h * 60 + min + sec / 60;
+
+  const transMatch = dateText && /穿越第\s*(\d+)\s*天/.exec(String(dateText).trim());
+  if (transMatch) {
+    const dayN = Math.max(1, parseInt(transMatch[1], 10));
+    return (dayN - 1) * 24 * 60 + minuteOfDay;
+  }
+  return null;
 }
 
 function getSystemClockFrom(system: Record<string, any> | null | undefined) {
-  const dateText = typeof system?.当前日期 === 'string' ? system.当前日期 : undefined;
   const timeText = typeof system?.当前时间 === 'string' ? system.当前时间 : undefined;
+  const dayCount = toFiniteNumber(system?.穿越天数);
+  let dateText: string | undefined;
+  if (dayCount !== null && dayCount >= 1 && timeText) {
+    dateText = `穿越第${Math.floor(dayCount)}天`;
+  }
   return {
     dateText,
     timeText,
@@ -1013,7 +1016,7 @@ export const DataService = {
     nowVirtualMinutes: number | null;
     extendFromExistingIfActive?: boolean;
   }): Promise<{ ok: boolean; message?: string; subscription?: SubscriptionState | null }> => {
-    if (nowVirtualMinutes === null) return { ok: false, message: '无法读取当前日期/时间，无法计算订阅到期时间' };
+    if (nowVirtualMinutes === null) return { ok: false, message: '无法读取穿越天数/时间，无法计算订阅到期时间' };
 
     const price = SUBSCRIPTION_PRICES[tier];
     const user = await DataService.getUserData();
